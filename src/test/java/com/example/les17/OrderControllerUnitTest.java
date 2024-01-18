@@ -1,9 +1,11 @@
 package com.example.les17;
 
 import com.example.les17.controller.OrderController;
+import com.example.les17.dto.InvoiceDto;
 import com.example.les17.dto.OrderDto;
 import com.example.les17.security.JwtService;
 import com.example.les17.service.OrderService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +54,26 @@ class OrderControllerUnitTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.productname", is("Batavus fiets")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.unitprice", is(1500.0)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.quantity", is(5)));
+    }
+
+    @Test
+    void shouldCalculateCorrectOrderAmount() throws Exception {
+
+        OrderDto orderDto = new OrderDto();
+        orderDto.orderid = 2233;
+        orderDto.productname = "Studie uur met Rowan";
+        orderDto.unitprice = 44.99;
+        orderDto.quantity = 30;
+
+        InvoiceDto invoiceDto = new InvoiceDto();
+        invoiceDto.amount = 30 * 44.99;
+
+        Mockito.when(orderService.getAmount(anyInt())).thenReturn(orderDto.unitprice * orderDto.quantity);
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/orders/2233/invoice"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.amount", is(invoiceDto.amount)));
     }
 }
