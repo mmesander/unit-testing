@@ -15,9 +15,7 @@ class OrderTest {
         double expectedResult = 199.99 * 4;
 
         // act
-        double unitprice = order.getUnitprice();
-        double amount = order.getQuantity();
-        double result = unitprice * amount;
+        double result = order.calculateAmount();
 
         // assert
         assertEquals(expectedResult, result);
